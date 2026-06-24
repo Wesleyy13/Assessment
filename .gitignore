@@ -1,0 +1,38 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build folders
+bin/
+obj/
+
+# NuGet
+*.nupkg
+packages/
+
+# Rider
+.idea/
+
+# Dotnet
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Playwright
+playwright.runsettings
+
+# Test results
+TestResults/
+
+# Logs
+*.log
+
+# VS Code
+.vscode/
