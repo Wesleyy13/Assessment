@@ -13,12 +13,14 @@ namespace Assessment.UiTesting.Basepages
         protected IPage Page = null!;
         public BasePOM basePOM = null!;
 
-        [SetUp]
         public async Task Setup()
         {
             // Read environment variables to control headed mode
             var headedEnv = Environment.GetEnvironmentVariable("PLAYWRIGHT_HEADED");
             var headed = !string.IsNullOrEmpty(headedEnv) && (headedEnv == "1" || headedEnv.Equals("true", StringComparison.OrdinalIgnoreCase));
+
+            // TEMPORARY: Force headed mode for debugging
+            headed = true;
 
             PlaywrightInstance = await Playwright.CreateAsync();
             Browser = await PlaywrightInstance.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = !headed });

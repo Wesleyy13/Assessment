@@ -56,6 +56,8 @@ namespace Assessment.UiTesting.Homepage
             // Step 3: Verify page loaded successfully
             string currentUrl = await homepagePOM.GetCurrentUrlAsync();
             Assert.That(currentUrl, Is.Not.Empty, "Page should load successfully");
+            Assert.That(await homepagePOM.IsTextVisibleAsync("Hammer"), Is.True,
+            "Hammer should be visible after searching.");
         }
 
         [Test]
@@ -77,6 +79,8 @@ namespace Assessment.UiTesting.Homepage
             // Step 3: Verify page loaded successfully
             string currentUrl = await homepagePOM.GetCurrentUrlAsync();
             Assert.That(currentUrl, Is.Not.Empty, "Page should load successfully");
+            Assert.That(await homepagePOM.IsTextVisibleAsync("Combination Pliers"), Is.True,
+            "Combination Pliers should be visible after selecting Hand Tools.");
         }
 
         [Test]
@@ -100,6 +104,8 @@ namespace Assessment.UiTesting.Homepage
 
             // Step 4: Verify pages load successfully
             Assert.That(page1Count, Is.GreaterThanOrEqualTo(0), "Page should load");
+            Assert.That(await homepagePOM.IsTextVisibleAsync("Sledgehammer"), Is.True,
+            "Sledgehammer should be visible on page 2.");
         }
 
         [Test]
@@ -121,6 +127,8 @@ namespace Assessment.UiTesting.Homepage
             // Step 3: Verify we are on a valid page
             string currentUrl = await homepagePOM.GetCurrentUrlAsync();
             Assert.That(currentUrl, Does.Contain("practicesoftwaretesting.com"), "Should be on the site");
+            Assert.That(await homepagePOM.IsTextVisibleAsync("Combination Pliers"), Is.True,
+            "Combination Pliers should be visible on the product details page.");
         }
     }
 }

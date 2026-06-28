@@ -8,156 +8,95 @@ namespace Assessment.UiTesting.Contactpage
     {
         public ContactPOM(IPage page) : base(page) { }
 
-        // Navigate to contact page
+        // Navigate to contact page by clicking Contact tab
         public async Task NavigateToContactPageAsync()
         {
-            // First navigate to the base address to ensure we're on the site
-            await page.GotoAsync(BASE_ADRESS);
-            await page.WaitForTimeoutAsync(500);
-
-            // Click on the Contact link in the top navigation bar
-            try
-            {
-                await page.ClickAsync("a:has-text('Contact'), a[href*='contact'], nav a:has-text('Contact')");
-                await page.WaitForTimeoutAsync(1000);
-            }
-            catch
-            {
-                // Fallback: try alternative selectors for the Contact link
-                var contactLink = await page.QuerySelectorAsync("text=Contact");
-                if (contactLink != null)
-                {
-                    await contactLink.ClickAsync();
-                    await page.WaitForTimeoutAsync(1000);
-                }
-            }
+            // Click on the Contact link in the top navigation bar (top right)
+            await page.ClickAsync("[data-test='nav-contact']");
+            await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
         }
 
-        // Fill contact form
-        public async Task FillFullNameAsync(string fullName)
+        // Fill first name
+        public async Task FillFirstNameAsync(string firstName)
         {
-            await page.FillAsync("input[name='fullname'], input[name='full_name'], input[placeholder*='name'], input[id*='name']", fullName, new() { Force = true });
+            await page.FillAsync("[data-test='first-name']", firstName);
             await page.WaitForTimeoutAsync(300);
         }
 
+        // Fill last name
+        public async Task FillLastNameAsync(string lastName)
+        {
+            await page.FillAsync("[data-test='last-name']", lastName);
+            await page.WaitForTimeoutAsync(300);
+        }
+
+        // Fill email
         public async Task FillEmailAsync(string email)
         {
-            await page.FillAsync("input[type='email'], input[name='email'], input[placeholder*='email']", email, new() { Force = true });
+            await page.FillAsync("[data-test='email']", email);
             await page.WaitForTimeoutAsync(300);
         }
 
-        public async Task FillSubjectAsync(string subject)
+        // Select subject from dropdown
+        public async Task SelectSubjectAsync(string subject)
         {
-            // Subject might not exist on the form, try multiple selectors
-            try
-            {
-                await page.FillAsync("input[name='subject'], input[placeholder*='subject']", subject, new() { Force = true });
-            }
-            catch
-            {
-                // If subject field doesn't exist, skip it
-                Console.WriteLine("Subject field not found, skipping...");
-            }
+            await page.SelectOptionAsync("[data-test='subject']", subject);
             await page.WaitForTimeoutAsync(300);
         }
 
+        // Fill message
         public async Task FillMessageAsync(string message)
         {
-            await page.FillAsync("textarea[name='message'], textarea[placeholder*='message'], textarea[name*='message']", message, new() { Force = true });
+            await page.FillAsync("[data-test='message']", message);
             await page.WaitForTimeoutAsync(300);
         }
 
         // Submit form
         public async Task SubmitFormAsync()
         {
-            try
-            {
-                var submitButton = await page.QuerySelectorAsync("button[type='submit'], button:has-text('Submit'), button:has-text('Send')");
-                if (submitButton != null)
-                {
-                    await submitButton.ClickAsync();
-                }
-                else
-                {
-                    await page.PressAsync("textarea", "Enter");
-                }
-            }
-            catch
-            {
-                await page.ClickAsync("button");
-            }
+            await page.ClickAsync("[data-test='contact-submit']");
             await page.WaitForTimeoutAsync(1000);
         }
 
         // Get success message
         public async Task<string> GetSuccessMessageAsync()
         {
-            var successElement = await page.QuerySelectorAsync(".alert-success");
+            var successElement = await page.QuerySelectorAsync(".alert-success, [data-test='success-message']");
             if (successElement != null)
             {
-                return await successElement.TextContentAsync();
+                return await successElement.TextContentAsync() ?? string.Empty;
             }
             return string.Empty;
         }
 
-        public async Task<string> GetCurrentUrlAsync()
+        // Validation error checks
+        public async Task<bool> HasFirstNameErrorAsync()
         {
-            return page.Url;
+            var errorElement = await page.QuerySelectorAsync("[data-test='first-name-error'], #first-name-error");
+            return errorElement != null;
         }
 
-        // Get validation error messages
-        public async Task<bool> HasFullNameErrorAsync()
+        public async Task<bool> HasLastNameErrorAsync()
         {
-            var errorElement = await page.QuerySelectorAsync("input[id='full-name']:invalid");
+            var errorElement = await page.QuerySelectorAsync("[data-test='last-name-error'], #last-name-error");
             return errorElement != null;
         }
 
         public async Task<bool> HasEmailErrorAsync()
         {
-            var errorElement = await page.QuerySelectorAsync("input[id='email']:invalid");
-            return errorElement != null;
-        }
-
-        public async Task<bool> HasSubjectErrorAsync()
-        {
-            var errorElement = await page.QuerySelectorAsync("input[id='subject']:invalid");
+            var errorElement = await page.QuerySelectorAsync("[data-test='email-error'], #email-error");
             return errorElement != null;
         }
 
         public async Task<bool> HasMessageErrorAsync()
         {
-            var errorElement = await page.QuerySelectorAsync("textarea[id='message']:invalid");
+            var errorElement = await page.QuerySelectorAsync("[data-test='message-error'], #message-error");
             return errorElement != null;
         }
 
-        public async Task<string> GetFullNameErrorMessageAsync()
+        public async Task<string> GetCurrentUrlAsync()
         {
-            var errorElement = await page.QuerySelectorAsync(".invalid-feedback-full-name, [data-field='full-name'] .invalid-feedback");
-            if (errorElement != null)
-            {
-                return await errorElement.TextContentAsync();
-            }
-            return string.Empty;
-        }
-
-        public async Task<string> GetEmailErrorMessageAsync()
-        {
-            var errorElement = await page.QuerySelectorAsync(".invalid-feedback-email, [data-field='email'] .invalid-feedback, .error-email");
-            if (errorElement != null)
-            {
-                return await errorElement.TextContentAsync();
-            }
-            return string.Empty;
-        }
-
-        public async Task<string> GetMessageErrorMessageAsync()
-        {
-            var errorElement = await page.QuerySelectorAsync(".invalid-feedback-message, [data-field='message'] .invalid-feedback, .error-message");
-            if (errorElement != null)
-            {
-                return await errorElement.TextContentAsync();
-            }
-            return string.Empty;
+            return page.Url;
         }
     }
 }

@@ -19,16 +19,8 @@ namespace Assessment.UiTesting.Cartpage
         // Navigate to cart page
         public async Task NavigateToCartAsync()
         {
-            try
-            {
-                await page.ClickAsync("a[href*='cart'], button[data-testid='cart'], .cart-link");
-            }
-            catch
-            {
-                // Try alternative selectors
-                await page.ClickAsync("text=cart, text=Cart");
-            }
-            await page.WaitForTimeoutAsync(1000);
+            await page.Locator("a[href*='cart']").First.ClickAsync();
+            await page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
         }
 
         // Add product to cart by index
@@ -45,39 +37,12 @@ namespace Assessment.UiTesting.Cartpage
         // Add product to cart by name
         public async Task AddProductToCartByNameAsync(string productName)
         {
-            try
-            {
-                // Try to find the product card/container with the product name and click its add to cart button
-                var productCard = await page.QuerySelectorAsync($"xpath=//div[contains(., '{productName}')]//button[contains(text(), 'Add to cart')]");
-                if (productCard != null)
-                {
-                    await productCard.ClickAsync();
-                    await page.WaitForTimeoutAsync(500);
-                    return;
-                }
-
-                // Alternative approach: find product by name in product title/heading and then find the closest add button
-                var productElement = await page.QuerySelectorAsync($"xpath=//h2[contains(text(), '{productName}')] | //h3[contains(text(), '{productName}')] | //span[contains(text(), '{productName}')]");
-                if (productElement != null)
-                {
-                    // Find the parent product container
-                    var productContainer = await productElement.EvaluateAsync<IElementHandle>("el => el.closest('.product, .product-item, [data-testid=\"product\"]')");
-                    if (productContainer != null)
-                    {
-                        var addButton = await productContainer.QuerySelectorAsync("button:has-text('Add to cart'), button[data-testid='add-to-cart']");
-                        if (addButton != null)
-                        {
-                            await addButton.ClickAsync();
-                            await page.WaitForTimeoutAsync(500);
-                        }
-                    }
-                }
-            }
-            catch
-            {
-                // If product not found, throw exception
-                throw new Exception($"Product '{productName}' not found or cannot be added to cart");
-            }
+            // Find product and click add to cart button
+            var productLocator = page.Locator($"text={productName}");
+            var productContainer = productLocator.Locator("..").Locator("..");
+            var addButton = productContainer.Locator("button", new LocatorLocatorOptions { HasText = "Add to cart" });
+            await addButton.First.ClickAsync();
+            await page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
         }
 
         // Get product names in cart
@@ -139,12 +104,9 @@ namespace Assessment.UiTesting.Cartpage
         // Remove product from cart
         public async Task RemoveProductFromCartAsync(int productIndex)
         {
-            var removeButtons = await page.QuerySelectorAllAsync("button:has-text('Remove'), button[data-testid='remove-from-cart']");
-            if (productIndex < removeButtons.Count)
-            {
-                await removeButtons[productIndex].ClickAsync();
-                await page.WaitForTimeoutAsync(500);
-            }
+            var removeButtons = page.Locator("button").Filter(new LocatorFilterOptions { HasText = "Remove" });
+            await removeButtons.Nth(productIndex).ClickAsync();
+            await page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
         }
 
         // Empty cart
@@ -190,6 +152,27 @@ namespace Assessment.UiTesting.Cartpage
         {
             var cartItems = await page.QuerySelectorAllAsync(".cart-item, [data-testid='cart-item']");
             return cartItems.Count;
+        }
+
+        // Click on a product by name to view product details
+        public async Task ClickProductByNameAsync(string productName)
+        {
+            await page.Locator($"text={productName}").First.ClickAsync();
+            await page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+        }
+
+        // Check if "Niet op voorraad" text is visible on product details page
+        public async Task<bool> IsOutOfStockTextVisibleAsync()
+        {
+            var count = await page.Locator("text=Niet op voorraad").CountAsync();
+            return count > 0;
+        }
+
+        // Check if empty cart message is visible
+        public async Task<bool> IsEmptyCartMessageVisibleAsync()
+        {
+            var count = await page.Locator("text=De winkelwagen is leeg. Niets te tonen.").CountAsync();
+            return count > 0;
         }
     }
 }

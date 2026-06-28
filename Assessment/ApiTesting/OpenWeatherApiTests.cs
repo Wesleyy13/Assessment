@@ -230,8 +230,6 @@ namespace Assessment.ApiTesting
                 Assert.That(cityData.lat, Is.Not.Zero, $"Latitude should be valid for {cityName}");
                 Assert.That(cityData.lon, Is.Not.Zero, $"Longitude should be valid for {cityName}");
                 Assert.That(cityData.country, Is.Not.Empty, $"Country should not be empty for {cityName}");
-
-                Console.WriteLine($"City: {cityName}, Name: {cityData.name}, Country: {cityData.country}, ID: {cityData.id}, Lat: {cityData.lat}, Lon: {cityData.lon}");
             }
             finally
             {

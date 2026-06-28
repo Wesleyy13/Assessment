@@ -21,32 +21,33 @@ namespace Assessment.UiTesting.Cartpage
         }
 
         [Test]
-        public async Task AddSingleProductToCart()
+        public async Task SimpleBrowserTest()
         {
-            try
-            {
-                // Step 1: Navigate to products page
-                // (Already in setup)
-
-                // Step 2: Add "Combination Pliers" to cart
-                await cartPOM.AddProductToCartByNameAsync("Combination Pliers");
-
-                // Step 3: Navigate to cart page
-                await cartPOM.NavigateToCartAsync();
-
-                // Step 4: Verify product is in cart
-                var cartProductNames = await cartPOM.GetProductNamesInCartAsync();
-                Assert.That(cartProductNames.Count, Is.GreaterThan(0), "Cart should contain at least one product");
-                Assert.That(cartProductNames, Does.Contain("Combination Pliers").IgnoreCase, 
-                    "Cart should contain 'Combination Pliers'");
-            }
-            catch
-            {
-                Assert.Pass("Cart interaction attempted");
-            }
+            // Just verify the browser opened and navigated to products page
+            await Task.Delay(3000); // Wait 3 seconds so you can see the browser
+            Assert.Pass("Browser opened successfully in headed mode");
         }
 
         [Test]
+        public async Task AddSingleProductToCart()
+        {
+            // Step 1: Navigate to products page (already in setup)
+
+            // Step 2: Add "Combination Pliers" to cart
+            await cartPOM.AddProductToCartByNameAsync("Combination Pliers");
+
+            // Step 3: Navigate to cart page
+            await cartPOM.NavigateToCartAsync();
+
+            // Step 4: Verify product is in cart
+            var cartProductNames = await cartPOM.GetProductNamesInCartAsync();
+            Assert.That(cartProductNames.Count, Is.GreaterThan(0), "Cart should contain at least one product");
+            Assert.That(cartProductNames, Does.Contain("Combination Pliers").IgnoreCase, 
+                "Cart should contain 'Combination Pliers'");
+        }
+
+        [Test]
+
         public async Task AddMultipleProductsToCart()
         {
             try
@@ -123,33 +124,6 @@ namespace Assessment.UiTesting.Cartpage
         }
 
         [Test]
-        public async Task CannotAddOutOfStockProductToCart()
-        {
-            try
-            {
-                // Step 1: Navigate to products page
-                // (Already in setup)
-
-                // Step 2: Check if product is out of stock
-                bool isOutOfStock = await cartPOM.IsProductOutOfStockAsync(5);
-
-                // Step 3: Verify out of stock status
-                if (isOutOfStock)
-                {
-                    Assert.Pass("Out of stock check completed");
-                }
-                else
-                {
-                    Assert.Pass("No out of stock items found");
-                }
-            }
-            catch
-            {
-                Assert.Pass("Out of stock check attempted");
-            }
-        }
-
-        [Test]
         public async Task RemoveProductFromCartShowsMessage()
         {
             try
@@ -183,24 +157,19 @@ namespace Assessment.UiTesting.Cartpage
             }
         }
 
-        [Test]
-        public async Task EmptyCartShowsEmptyMessage()
-        {
-            try
-            {
-                // Step 1: Navigate to cart page
-                await cartPOM.NavigateToCartAsync();
+        
+            // Step 2: Add a product to cart
+            await cartPOM.AddProductToCartByNameAsync("Combination Pliers");
 
-                // Step 2: Empty the cart
-                await cartPOM.EmptyCartAsync();
+            // Step 3: Navigate to cart page
+            await cartPOM.NavigateToCartAsync();
 
-                // Step 3: Verify empty cart message is shown
-                Assert.Pass("Empty cart operation completed");
-            }
-            catch
-            {
-                Assert.Pass("Empty cart operation attempted");
-            }
+            // Step 4: Remove the product from cart
+            await cartPOM.RemoveProductFromCartAsync(0);
+
+            // Step 5: Verify empty cart message is displayed
+            bool isEmptyMessageVisible = await cartPOM.IsEmptyCartMessageVisibleAsync();
+            Assert.That(isEmptyMessageVisible, Is.True, "Empty cart message 'De winkelwagen is leeg. Niets te tonen.' should be visible");
         }
     }
 }

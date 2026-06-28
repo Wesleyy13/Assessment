@@ -44,19 +44,16 @@ namespace Assessment.ApiTesting
             });
 
             var searchBody = await searchResponse.TextAsync();
-            Console.WriteLine("Search Response: " + searchBody);
 
             var searchResults = JsonSerializer.Deserialize<List<ShowSearchResult>>(searchBody);
             Assert.That(searchResults.Count, Is.GreaterThan(0), "Should find breaking bad");
 
             // Step 2: Extract show ID from search result
             var showId = searchResults[0].show.id;
-            Console.WriteLine("Found show ID: " + showId);
 
             // Step 3: Get detailed show information
             var showResponse = await requestContext.GetAsync($"/shows/{showId}");
             var showBody = await showResponse.TextAsync();
-            Console.WriteLine("Show Response: " + showBody);
 
             // Step 4: Validate url contains the ID
             var show = JsonSerializer.Deserialize<Show>(showBody);

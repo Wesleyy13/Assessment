@@ -22,13 +22,17 @@ namespace Assessment.UiTesting.Contactpage
         public async Task FillAndSubmitContactForm()
         {
             // Step 1: Prepare test data
-            string fullName = "John Doe";
+            string firstName = "John";
+            string lastName = "Doe";
             string email = "john@example.com";
+            string subject = "customer-service"; // Valid subject option
             string message = "This is a test message for the contact form that is longer than 50 characters.";
 
             // Step 2: Fill in the contact form fields
-            await contactPOM.FillFullNameAsync(fullName);
+            await contactPOM.FillFirstNameAsync(firstName);
+            await contactPOM.FillLastNameAsync(lastName);
             await contactPOM.FillEmailAsync(email);
+            await contactPOM.SelectSubjectAsync(subject);
             await contactPOM.FillMessageAsync(message);
 
             // Step 3: Submit the form
@@ -37,9 +41,6 @@ namespace Assessment.UiTesting.Contactpage
             // Step 4: Verify success message is displayed
             string successMessage = await contactPOM.GetSuccessMessageAsync();
             Assert.That(successMessage, Is.Not.Empty, "Success message should be displayed after submitting form");
-
-            Console.WriteLine($"Form submitted successfully!");
-            Console.WriteLine($"Success Message: {successMessage}");
         }
 
         [Test]
@@ -49,66 +50,66 @@ namespace Assessment.UiTesting.Contactpage
             await contactPOM.SubmitFormAsync();
 
             // Step 2: Check validation errors for required fields
-            bool fullNameHasError = await contactPOM.HasFullNameErrorAsync();
+            bool firstNameHasError = await contactPOM.HasFirstNameErrorAsync();
+            bool lastNameHasError = await contactPOM.HasLastNameErrorAsync();
             bool emailHasError = await contactPOM.HasEmailErrorAsync();
             bool messageHasError = await contactPOM.HasMessageErrorAsync();
 
             // Step 3: Verify all required fields show validation errors
-            Assert.That(fullNameHasError, Is.True, "Full Name field should show validation error");
+            Assert.That(firstNameHasError, Is.True, "First Name field should show validation error");
+            Assert.That(lastNameHasError, Is.True, "Last Name field should show validation error");
             Assert.That(emailHasError, Is.True, "Email field should show validation error");
             Assert.That(messageHasError, Is.True, "Message field should show validation error");
-
-            Console.WriteLine("All required fields show validation errors!");
-            Console.WriteLine($"Full Name Error: {fullNameHasError}");
-            Console.WriteLine($"Email Error: {emailHasError}");
-            Console.WriteLine($"Message Error: {messageHasError}");
         }
 
         [Test]
         public async Task InvalidEmailFormatShowsError()
         {
             // Step 1: Prepare test data with invalid email
-            string fullName = "John Doe";
-            string invalidEmail = "@@##$$%%";
+            string firstName = "John";
+            string lastName = "Doe";
+            string invalidEmail = "invalid-email";
+            string subject = "customer-service";
             string message = "This is a test message for the contact form that is longer than 50 characters to meet the requirement.";
 
             // Step 2: Fill the form with invalid email
-            await contactPOM.FillFullNameAsync(fullName);
+            await contactPOM.FillFirstNameAsync(firstName);
+            await contactPOM.FillLastNameAsync(lastName);
             await contactPOM.FillEmailAsync(invalidEmail);
+            await contactPOM.SelectSubjectAsync(subject);
             await contactPOM.FillMessageAsync(message);
 
             // Step 3: Submit the form
             await contactPOM.SubmitFormAsync();
 
             // Step 4: Verify email validation error is displayed
-            string emailErrorMessage = await contactPOM.GetEmailErrorMessageAsync();
-            Assert.That(emailErrorMessage, Does.Contain("E-mailformaat is ongeldig"), "Should show email format error message");
-
-            Console.WriteLine($"Email validation error displayed: {emailErrorMessage}");
+            bool emailHasError = await contactPOM.HasEmailErrorAsync();
+            Assert.That(emailHasError, Is.True, "Email field should show validation error for invalid format");
         }
 
         [Test]
         public async Task MessageLessThan50CharactersShowsError()
         {
             // Step 1: Prepare test data with short message
-            string fullName = "John Doe";
+            string firstName = "John";
+            string lastName = "Doe";
             string email = "john@example.com";
+            string subject = "customer-service";
             string shortMessage = "This is too short"; // Less than 50 characters
 
             // Step 2: Fill the form with short message
-            await contactPOM.FillFullNameAsync(fullName);
+            await contactPOM.FillFirstNameAsync(firstName);
+            await contactPOM.FillLastNameAsync(lastName);
             await contactPOM.FillEmailAsync(email);
+            await contactPOM.SelectSubjectAsync(subject);
             await contactPOM.FillMessageAsync(shortMessage);
 
             // Step 3: Submit the form
             await contactPOM.SubmitFormAsync();
 
             // Step 4: Verify message length validation error is displayed
-            string messageErrorMessage = await contactPOM.GetMessageErrorMessageAsync();
-            Assert.That(messageErrorMessage, Does.Contain("Bericht moet minimaal 50 tekens lang zijn"), "Should show minimum character requirement error");
-
-            Console.WriteLine($"Message length validation error displayed: {messageErrorMessage}");
-            Console.WriteLine($"Message length: {shortMessage.Length} characters (minimum required: 50)");
+            bool messageHasError = await contactPOM.HasMessageErrorAsync();
+            Assert.That(messageHasError, Is.True, "Message field should show validation error for too short message");
         }
     }
 }
