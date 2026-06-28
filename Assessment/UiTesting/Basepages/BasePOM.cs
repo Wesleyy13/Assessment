@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.Playwright;
 
-namespace Assessment.BasePages
+namespace Assessment.UiTesting.Basepages
 {
     public class BasePOM
     {

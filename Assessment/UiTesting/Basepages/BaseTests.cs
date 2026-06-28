@@ -3,7 +3,7 @@ using NUnit.Framework;
 using System;
 using System.Threading.Tasks;
 
-namespace Assessment.BasePages
+namespace Assessment.UiTesting.Basepages
 {
     // Manage Playwright lifecycle here so tests can control headed/keep-open via env vars or runsettings
     public class BaseTests
