@@ -2,6 +2,7 @@ using Assessment.UiTesting.Basepages;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Assessment.UiTesting.Cartpage;
 
@@ -27,15 +28,17 @@ namespace Assessment.UiTesting.Cartpage
                 // Step 1: Navigate to products page
                 // (Already in setup)
 
-                // Step 2: Add first product to cart
-                await cartPOM.AddProductToCartAsync(0);
+                // Step 2: Add "Combination Pliers" to cart
+                await cartPOM.AddProductToCartByNameAsync("Combination Pliers");
 
                 // Step 3: Navigate to cart page
                 await cartPOM.NavigateToCartAsync();
 
                 // Step 4: Verify product is in cart
                 var cartProductNames = await cartPOM.GetProductNamesInCartAsync();
-                Assert.That(cartProductNames.Count, Is.GreaterThanOrEqualTo(0), "Cart action completed");
+                Assert.That(cartProductNames.Count, Is.GreaterThan(0), "Cart should contain at least one product");
+                Assert.That(cartProductNames, Does.Contain("Combination Pliers").IgnoreCase, 
+                    "Cart should contain 'Combination Pliers'");
             }
             catch
             {
@@ -51,13 +54,13 @@ namespace Assessment.UiTesting.Cartpage
                 // Step 1: Navigate to products page
                 // (Already in setup)
 
-                // Step 2: Add multiple products to cart
-                int productsToAdd = 2;
-                for (int i = 0; i < productsToAdd; i++)
+                // Step 2: Add multiple specific products to cart
+                var productsToAdd = new[] { "Combination Pliers", "pliers", "Bolt Cutters" };
+                foreach (var productName in productsToAdd)
                 {
                     try
                     {
-                        await cartPOM.AddProductToCartAsync(i);
+                        await cartPOM.AddProductToCartByNameAsync(productName);
                     }
                     catch
                     {
@@ -69,7 +72,17 @@ namespace Assessment.UiTesting.Cartpage
                 await cartPOM.NavigateToCartAsync();
 
                 // Step 4: Verify multiple products are in cart
-                Assert.Pass("Cart interaction completed");
+                var cartProductNames = await cartPOM.GetProductNamesInCartAsync();
+                Assert.That(cartProductNames.Count, Is.GreaterThanOrEqualTo(2), 
+                    "Cart should contain at least 2 products");
+
+                // Verify each product is in the cart
+                foreach (var productName in productsToAdd)
+                {
+                    Assert.That(cartProductNames.Any(p => p.Contains(productName, StringComparison.OrdinalIgnoreCase)), 
+                        Is.True, 
+                        $"Cart should contain '{productName}'");
+                }
             }
             catch
             {
@@ -85,16 +98,22 @@ namespace Assessment.UiTesting.Cartpage
                 // Step 1: Navigate to products page
                 // (Already in setup)
 
-                // Step 2: Add product to cart
-                await cartPOM.AddProductToCartAsync(0);
+                // Step 2: Add "pliers" to cart
+                await cartPOM.AddProductToCartByNameAsync("pliers");
 
                 // Step 3: Navigate to cart page
                 await cartPOM.NavigateToCartAsync();
 
-                // Step 4: Increase product quantity
+                // Step 4: Verify product is in cart
+                var cartProductNames = await cartPOM.GetProductNamesInCartAsync();
+                Assert.That(cartProductNames.Any(p => p.Contains("pliers", StringComparison.OrdinalIgnoreCase)), 
+                    Is.True, 
+                    "Cart should contain 'pliers'");
+
+                // Step 5: Increase product quantity
                 await cartPOM.IncreaseProductQuantityAsync(0);
 
-                // Step 5: Verify price has increased
+                // Step 6: Verify price has increased
                 Assert.Pass("Quantity update operation completed");
             }
             catch
@@ -138,17 +157,25 @@ namespace Assessment.UiTesting.Cartpage
                 // Step 1: Navigate to products page
                 // (Already in setup)
 
-                // Step 2: Add product to cart
-                await cartPOM.AddProductToCartAsync(0);
+                // Step 2: Add "Bolt Cutters" to cart
+                await cartPOM.AddProductToCartByNameAsync("Bolt Cutters");
 
                 // Step 3: Navigate to cart page
                 await cartPOM.NavigateToCartAsync();
 
-                // Step 4: Remove product from cart
+                // Step 4: Verify product is in cart before removal
+                var cartProductNamesBeforeRemoval = await cartPOM.GetProductNamesInCartAsync();
+                Assert.That(cartProductNamesBeforeRemoval.Any(p => p.Contains("Bolt Cutters", StringComparison.OrdinalIgnoreCase)), 
+                    Is.True, 
+                    "Cart should contain 'Bolt Cutters' before removal");
+
+                // Step 5: Remove product from cart
                 await cartPOM.RemoveProductFromCartAsync(0);
 
-                // Step 5: Verify removal message is shown
-                Assert.Pass("Product removal operation completed");
+                // Step 6: Verify product has been removed
+                var cartProductNamesAfterRemoval = await cartPOM.GetProductNamesInCartAsync();
+                Assert.That(cartProductNamesAfterRemoval.Count, Is.LessThan(cartProductNamesBeforeRemoval.Count), 
+                    "Cart should have fewer items after removal");
             }
             catch
             {

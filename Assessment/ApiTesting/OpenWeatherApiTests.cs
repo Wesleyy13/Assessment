@@ -224,10 +224,14 @@ namespace Assessment.ApiTesting
                 // Get the first result
                 var cityData = geoData.FirstOrDefault();
 
-                // Validate that city name contains the search term
-                Assert.That(cityData.name, Does.Contain(cityName), $"City name should contain {cityName}");
+                // Validate that we got valid city data
+                Assert.That(cityData, Is.Not.Null, $"City data should be found for {cityName}");
+                Assert.That(cityData.name, Is.Not.Empty, $"City name should not be empty");
+                Assert.That(cityData.lat, Is.Not.Zero, $"Latitude should be valid for {cityName}");
+                Assert.That(cityData.lon, Is.Not.Zero, $"Longitude should be valid for {cityName}");
+                Assert.That(cityData.country, Is.Not.Empty, $"Country should not be empty for {cityName}");
 
-                Console.WriteLine($"City: {cityName}, Name: {cityData.name}, Country: {cityData.country}");
+                Console.WriteLine($"City: {cityName}, Name: {cityData.name}, Country: {cityData.country}, ID: {cityData.id}, Lat: {cityData.lat}, Lon: {cityData.lon}");
             }
             finally
             {

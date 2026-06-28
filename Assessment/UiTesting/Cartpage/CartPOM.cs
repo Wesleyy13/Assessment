@@ -31,7 +31,7 @@ namespace Assessment.UiTesting.Cartpage
             await page.WaitForTimeoutAsync(1000);
         }
 
-        // Add product to cart
+        // Add product to cart by index
         public async Task AddProductToCartAsync(int productIndex)
         {
             var addButtons = await page.QuerySelectorAllAsync("button:has-text('Add to cart'), button[data-testid='add-to-cart']");
@@ -39,6 +39,44 @@ namespace Assessment.UiTesting.Cartpage
             {
                 await addButtons[productIndex].ClickAsync();
                 await page.WaitForTimeoutAsync(500);
+            }
+        }
+
+        // Add product to cart by name
+        public async Task AddProductToCartByNameAsync(string productName)
+        {
+            try
+            {
+                // Try to find the product card/container with the product name and click its add to cart button
+                var productCard = await page.QuerySelectorAsync($"xpath=//div[contains(., '{productName}')]//button[contains(text(), 'Add to cart')]");
+                if (productCard != null)
+                {
+                    await productCard.ClickAsync();
+                    await page.WaitForTimeoutAsync(500);
+                    return;
+                }
+
+                // Alternative approach: find product by name in product title/heading and then find the closest add button
+                var productElement = await page.QuerySelectorAsync($"xpath=//h2[contains(text(), '{productName}')] | //h3[contains(text(), '{productName}')] | //span[contains(text(), '{productName}')]");
+                if (productElement != null)
+                {
+                    // Find the parent product container
+                    var productContainer = await productElement.EvaluateAsync<IElementHandle>("el => el.closest('.product, .product-item, [data-testid=\"product\"]')");
+                    if (productContainer != null)
+                    {
+                        var addButton = await productContainer.QuerySelectorAsync("button:has-text('Add to cart'), button[data-testid='add-to-cart']");
+                        if (addButton != null)
+                        {
+                            await addButton.ClickAsync();
+                            await page.WaitForTimeoutAsync(500);
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // If product not found, throw exception
+                throw new Exception($"Product '{productName}' not found or cannot be added to cart");
             }
         }
 

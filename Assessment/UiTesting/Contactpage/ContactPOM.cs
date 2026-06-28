@@ -11,8 +11,26 @@ namespace Assessment.UiTesting.Contactpage
         // Navigate to contact page
         public async Task NavigateToContactPageAsync()
         {
-            await page.GotoAsync(BASE_ADRESS + "contact");
+            // First navigate to the base address to ensure we're on the site
+            await page.GotoAsync(BASE_ADRESS);
             await page.WaitForTimeoutAsync(500);
+
+            // Click on the Contact link in the top navigation bar
+            try
+            {
+                await page.ClickAsync("a:has-text('Contact'), a[href*='contact'], nav a:has-text('Contact')");
+                await page.WaitForTimeoutAsync(1000);
+            }
+            catch
+            {
+                // Fallback: try alternative selectors for the Contact link
+                var contactLink = await page.QuerySelectorAsync("text=Contact");
+                if (contactLink != null)
+                {
+                    await contactLink.ClickAsync();
+                    await page.WaitForTimeoutAsync(1000);
+                }
+            }
         }
 
         // Fill contact form
